@@ -114,8 +114,6 @@ for file_name in args.files :
     file_data ["count"] += 1
 
     fout.write(raw_bytes)
-    if file_data ["count"] > 4 :
-        break
 
 write_file_offset (fout, fout.tell ())
 print (json.dumps (file_data).encode())

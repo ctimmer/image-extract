@@ -26,20 +26,33 @@ SOFTWARE.
 # Cheap Yellow Display - ImageExtract demo
 #
 import gc
-#import time
-#import random
 import json
 
 class ImageExtract :
+    buffer = None
+    buffer_view = None
     def __init__ (self ,
                   image_file_name : str = None
                   ) :
         #print ("ImageExtract : __init__")
+        
         self.image_file = None
         self.image_config = None
         self.image_count = 0
         self.initialize_image_file (image_file_name)
         gc.collect ()
+
+    def allocate_buffer (self,
+                         buffer_size) :
+        if ImageExtract.buffer is not None :
+            if buffer_size <= len (ImageExtract.buffer) :
+                return buffer_size
+            else :
+                ImageExtract.buffer_view = None
+                ImageExtract.buffer = None
+                gc.collect ()
+        ImageExtract.buffer = bytearray (buffer_size)
+        ImageExtract.buffer_view = memoryview (ImageExtract.buffer)
 
     def initialize_image_file (self ,
                                 image_file_name : str
@@ -47,6 +60,7 @@ class ImageExtract :
         #print ("initialize_image_file")
         if image_file_name is None :
             return None
+        l_max = 0
         self.image_file = None
         self.image_config = None
         self.image_count = 0
@@ -55,18 +69,23 @@ class ImageExtract :
             offset = self.image_file.read (10)
             param_offset = int (offset)
             self.image_file.seek (param_offset)
-            params = self.image_file.read (10000).decode ()
+            params = self.image_file.read ().decode ()
             self.image_config = json.loads (params)
             self.image_count = self.image_config ["count"]
         except Exception as e :
             print ("load_image_file:", e)
             return None
+        for _, image_data in enumerate (self.image_config ["images"]) :
+            if image_data ["l"] > l_max :
+                l_max = image_data ["l"]
+        self.image_config ["l_max"] = l_max
+        self.allocate_buffer (l_max)
         return self.image_count
 
     def rename_id (self ,
                     old_id : str ,
                     new_id : str ,
-                    delete_old_id = True) :
+                    delete_old_id : bool = True) :
         if old_id not in self.image_config ["image_ids"] :
             print ("missing:", old_id)
             return None
@@ -98,9 +117,11 @@ class ImageExtract :
         image_data = self.get_image_data (image_idx)
         if image_data is None :
             return None
+        img_length = image_data ["l"]
         self.image_file.seek (image_data ["pos"])
-        return (self.image_file.read (image_data ["l"]) ,
-                image_data ["w"] ,
+        read_length = self.image_file.readinto (ImageExtract.buffer_view [:img_length])
+        return (ImageExtract.buffer_view [:image_data ["l"]],
+                image_data ["w"],
                 image_data ["h"])
     
     def get_image_id (self,
@@ -109,6 +130,15 @@ class ImageExtract :
             return None
         return self.get_image (self.image_config ["image_ids"][image_id])
 
+    def show (self) :
+        for _, (img_id, image_idx) in enumerate (self.image_config ["image_ids"].items ()) :
+            print (img_id, image_idx)
+            image_data = self.get_image_data (image_idx)
+            length = image_data ["l"]
+            width = image_data ["w"]
+            height = image_data ["h"]
+            print (f"  {length} {width} {height}")
+            
     def shut_down (self) :
         if self.image_file is not None :
             self.image_file.close ()

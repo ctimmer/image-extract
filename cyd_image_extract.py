@@ -1,36 +1,37 @@
-'''
-MIT License
-
-Copyright (c) 2026 Curt Timmerman
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-'''
+################################################################################
+#
+# MIT License
+#
+# Copyright (c) 2026 Curt Timmerman
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
 ################################################################################
 #
 # Cheap Yellow Display - ImageExtract demo
 #
-import time
-#import random
-import json
 
 import os
 from machine import SPI, Pin
+
+import time
+import json
 
 from modules.ili9341 import Display, color565
 #from modules.xglcd_font import XglcdFont
@@ -38,93 +39,11 @@ from modules.ili9341 import Display, color565
 USE_SDCARD = True
 
 from image_extract import ImageExtract
-
-'''
-class ImageExtract :
-    def __init__ (self ,
-                  image_file_name : str = None
-                  ) :
-        #print ("ImageExtract : __init__")
-        self.image_file = None
-        self.image_config = None
-        self.image_count = 0
-        self.initialize_image_file (image_file_name)
-        gc.collect ()
-
-    def initialize_image_file (self ,
-                                image_file_name : str
-                                ) :
-        #print ("initialize_image_file")
-        if image_file_name is None :
-            return None
-        self.image_file = None
-        self.image_config = None
-        self.image_count = 0
-        try :
-            self.image_file = open (image_file_name, "rb")
-            offset = self.image_file.read (10)
-            param_offset = int (offset)
-            self.image_file.seek (param_offset)
-            params = self.image_file.read (10000).decode ()
-            self.image_config = json.loads (params)
-            self.image_count = self.image_config ["count"]
-        except Exception as e :
-            print ("load_image_file:", e)
-            return None
-        return self.image_count
-
-    def rename_name (self ,
-                        old_name : str ,
-                        new_name : str ,
-                        remove_old = True) :
-        if old_name not in self.image_config ["image_ids"] :
-            return None
-        self.image_config ["image_ids"][new_name] \
-            = self.image_config ["image_ids"][old_name]
-        return self.image_config ["image_ids"][new_name] # return index
-    def rename_index (self ,
-                        image_idx : int ,
-                        new_name : str) :
-        if image_idx < 0 \
-        or image_idx >= self.image_count :
-            return None
-        #print (self.image_config ["image_ids"][new_name])
-        self.image_config ["image_ids"][new_name] = image_idx
-        return self.image_config ["image_ids"][new_name] # return index
-
-    def get_image_data (self ,
-                        image_idx : int) :
-        #print ("get_image_data")
-        if image_idx < 0 \
-        or image_idx >= self.image_count :
-            return None
-        return self.image_config ["images"][image_idx]
-    
-    def get_image (self ,
-                   image_idx : int) :
-        #print ("get_image")
-        image_data = self.get_image_data (image_idx)
-        if image_data is None :
-            return None
-        self.image_file.seek (image_data ["pos"])
-        return (self.image_file.read (image_data ["l"]) ,
-                image_data ["w"] ,
-                image_data ["h"])
-    
-    def get_image_by_name (self,
-                           image_name : str) :
-        if image_name not in self.image_config ["images"] :
-            return None
-        return self.get_image (self.image_config ["images"][image_name])
-
-    def shut_down (self) :
-        if self.image_file is not None :
-            self.image_file.close ()
-
-# end ImageExtract
-'''
 #
 
+#-------------------------------------------------------------------------------
+# DISPLAY initialize
+#-------------------------------------------------------------------------------
 SPI_ID = 1
 BAUDRATE = 60_000_000
 SCK_PIN = 14
@@ -138,12 +57,7 @@ ROTATION = 90
 DISPLAY_WIDTH = 320
 DISPLAY_HEIGHT = 240
 
-## SD card
-SD_SPI_ID = 1
-SD_MISO_PIN = 19
-SD_MOSI_PIN = 23
-SD_SCK_PIN = 18
-SD_CS_PIN = 5
+
 
 WHITE = color565 (255,255,255)
 BLACK = color565 (0,0,0)
@@ -178,6 +92,16 @@ def initialize_display () :
     return disp
 # end initialize_display #
 
+#-------------------------------------------------------------------------------
+## SD card initialize
+#-------------------------------------------------------------------------------
+
+SD_SPI_ID = 1
+SD_MISO_PIN = 19
+SD_MOSI_PIN = 23
+SD_SCK_PIN = 18
+SD_CS_PIN = 5
+
 def initialize_sdcard (mount_dir = "/sd") :
     #print ("initialize_sdcard")
     if not USE_SDCARD :
@@ -201,12 +125,15 @@ def initialize_sdcard (mount_dir = "/sd") :
 
 # end initialize_sdcard
 
-#----------------------------------------------------------------------------------
+################################################################################
+# MAIN
+################################################################################
+
 display = initialize_display ()
 initialize_sdcard ()
 
+image_extract_150 = ImageExtract ("images_150.bin")
 image_extract_100 = ImageExtract ("images_100.bin")
-image_extract_120 = ImageExtract ("images_120.bin")
 
 def display_image_index_100 (image_idx : int, x = 0, y = 0) :
     img = image_extract_100.get_image (image_idx)
@@ -216,19 +143,20 @@ def display_image_id_100 (image_name : str, x = 0, y = 0) :
     img = image_extract_100.get_image_id (image_name)
     if img is not None :
         display.draw_sprite (img [0], x, y, img [1], img [2])
-def display_image_index_120 (image_idx : int, x = 0, y = 0) :
-    img = image_extract_120.get_image (image_idx)
+
+def display_image_index_150 (image_idx : int, x = 0, y = 0) :
+    img = image_extract_150.get_image (image_idx)
+    if img is not None :
+        display.draw_sprite (img [0], x, y, img [1], img [2])
+def display_image_id_150 (image_name : str, x = 0, y = 0) :
+    img = image_extract_150.get_image_id (image_name)
     if img is not None :
         display.draw_sprite (img [0], x, y, img [1], img [2])
 
-def display_image_id_120 (image_name : str, x = 0, y = 0) :
-    img = image_extract_120.get_image_id (image_name)
-    if img is not None :
-        display.draw_sprite (img [0], x, y, img [1], img [2])
-
-LARGE_PICS = True
-
+#image_extract_150.show ()
 for ids in [
+    ["IMG_0209", "kennecott"] ,
+    ["IMG_4851", "iditarod"] ,
     ["mccarthy_Slide242", "glacier"] ,
     ["mccarthy_Slide40", "cabin"] ,
     ["mccarthy_Slide68", "mountain"] ,
@@ -236,19 +164,34 @@ for ids in [
     ["mccarthy_Slide94", "river"]
     ] :
     image_extract_100.rename_id (ids [0], ids [1])
-    image_extract_120.rename_id (ids [0], ids [1])
+    image_extract_150.rename_id (ids [0], ids [1])
+#image_extract_150.show ()
 
-if LARGE_PICS :
-    display_image_id_120 ("glacier", 0, 10)
-    display_image_id_120 ("mountain", 125, 10)
-    #display_image_id_120 ("bear", 0, 10)
-    #display_image_id_120 ("river", 125, 10)
-else :
-    display_image_index_100 (0, 0, 0)
-    display_image_index_100 (1, 105, 0)
-    display_image_index_100 (2, 210, 0)
-    display_image_index_100 (3, 0, 105)
-    display_image_index_100 (4, 105, 105)
+
+
+print ("Large images")
+display.clear (WHITE)
+#display_image_id_150 ("glacier", 5, 10)
+#display_image_id_150 ("mountain", 160, 10)
+display_image_id_150 ("bear", 5, 10)
+display_image_id_150 ("river", 160, 10)
+time.sleep (5)
+
+print ("Small images")
+display.clear (BLUE)
+display_image_index_100 (0, 0, 10)
+display_image_index_100 (1, 105, 10)
+display_image_index_100 (2, 210, 10)
+display_image_index_100 (3, 0, 115)
+display_image_index_100 (4, 105, 115)
+display_image_index_100 (5, 210, 115)
+time.sleep (5)
+
+print ("Mixed images")
+display.clear (BROWN)
+display_image_id_150 ("mountain", 20, 30)
+display_image_id_100 ("kennecott", 180, 30)
+display_image_id_100 ("iditarod", 180, 120)
 
 image_extract_100.shut_down ()
-image_extract_120.shut_down ()
+image_extract_150.shut_down ()
