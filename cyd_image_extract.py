@@ -36,7 +36,7 @@ import json
 from modules.ili9341 import Display, color565
 #from modules.xglcd_font import XglcdFont
 
-USE_SDCARD = True
+USE_SDCARD = False
 
 from image_extract import ImageExtract
 #

@@ -31,12 +31,9 @@ from pathlib import Path
 import struct
 
 def img_to_rgb565 (img, big_endian=True):
-    #img = Image.open(image_path).convert("RGB")
     pixels = img.get_flattened_data ()
-    #print ("rgb565:", img.width, img.height)
     length = img.width * img.height
     img_data = bytearray (length * 2)
-    #print ("rgb565:", len (img_data))
 
     # '>H' for big-endian, '<H' for little-endian
     endian_format = ">H" if big_endian else "<H"
