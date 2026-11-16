@@ -67,6 +67,9 @@ def parse_arguments () :
                         nargs=2,
                         type=int,
                         help="thumbnail w, h")
+    parser.add_argument('-l', '--littleendian',
+                        action='store_true',
+                        help='Enable little endian')
     parser.add_argument ("files",
                         nargs="+",
                         help="One or more input files")
@@ -75,7 +78,7 @@ def parse_arguments () :
 
 args = parse_arguments ()
 
-file_data = {
+image_config = {
     "count" : 0 ,
     "thumbnail" : args.thumbnail ,
     "images" : [
@@ -85,12 +88,11 @@ file_data = {
     }
 
 fout = open (args.output, "wb")
-write_file_offset (fout, 0)
+write_file_offset (fout, 0)             # reserve offset field
 
 for file_name in args.files :
     #print (file_name)
     file_path = Path(file_name)
-    #file_stem = file_path.stem
 
     # Open the image and ensure it is in RGB mode (strips alpha channel if PNG)
     img = Image.open(file_name).convert("RGB")
@@ -98,22 +100,22 @@ for file_name in args.files :
     if args.thumbnail is not None :
         img.thumbnail ((args.thumbnail[0], args.thumbnail[1]))
     
-    raw_bytes = img_to_rgb565 (img)
+    raw_bytes = img_to_rgb565 (img, not args.littleendian)
 
     img.close ()
-    file_data ["images"].append ({
+    image_config ["images"].append ({
         "pos" : fout.tell () ,
         "l" : len (raw_bytes) ,
         "w" : img.width ,
         "h" : img.height
         })
-    file_data ["image_ids"][file_path.stem] = file_data ["count"]
-    file_data ["count"] += 1
+    image_config ["image_ids"][file_path.stem] = image_config ["count"]
+    image_config ["count"] += 1
 
     fout.write(raw_bytes)
 
 write_file_offset (fout, fout.tell ())
-print (json.dumps (file_data).encode())
-fout.write (json.dumps (file_data).encode())
+#print (json.dumps (image_config).encode())
+fout.write (json.dumps (image_config).encode())
 fout.close ()
 

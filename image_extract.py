@@ -39,8 +39,8 @@ class ImageExtract :
         self.image_file = None
         self.image_config = None
         self.image_count = 0
+        self.image_default_index = None
         self.initialize_image_file (image_file_name)
-        gc.collect ()
 
     def allocate_buffer (self,
                          buffer_size) :
@@ -55,8 +55,7 @@ class ImageExtract :
         ImageExtract.buffer_view = memoryview (ImageExtract.buffer)
 
     def initialize_image_file (self ,
-                                image_file_name : str
-                                ) :
+                                image_file_name : str) :
         #print ("initialize_image_file")
         if image_file_name is None :
             return None
@@ -116,7 +115,7 @@ class ImageExtract :
         #print ("get_image")
         image_data = self.get_image_data (image_idx)
         if image_data is None :
-            return None
+            return self.get_default_image ()
         img_length = image_data ["l"]
         self.image_file.seek (image_data ["pos"])
         read_length = self.image_file.readinto (ImageExtract.buffer_view [:img_length])
@@ -127,8 +126,33 @@ class ImageExtract :
     def get_image_id (self,
                         image_id : str) :
         if image_id not in self.image_config ["image_ids"] :
-            return None
+            return self.get_default_image ()
         return self.get_image (self.image_config ["image_ids"][image_id])
+
+    def set_default_image (self,
+                           image_index : int) :
+        image_data = self.get_image_data (image_index)
+        if image_data is None :
+            return None
+        self.image_default_index = image_index
+        return image_data
+    def set_default_image_id (self,
+                              image_id : str) :
+        if image_id not in self.image_config ["image_ids"] :
+            return None
+        return self.set_default_image (self.image_config ["image_ids"][image_id])
+    def get_default_image (self) :
+        if self.image_default_index is None :
+            return None
+        image_data = self.get_image_data (self.image_default_index)
+        if image_data is None :
+            return None
+        img_length = image_data ["l"]
+        self.image_file.seek (image_data ["pos"])
+        read_length = self.image_file.readinto (ImageExtract.buffer_view [:img_length])
+        return (ImageExtract.buffer_view [:image_data ["l"]],
+                image_data ["w"],
+                image_data ["h"])
 
     def show (self) :
         for _, (img_id, image_idx) in enumerate (self.image_config ["image_ids"].items ()) :

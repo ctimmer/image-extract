@@ -4,6 +4,8 @@
 
 python build_image_file.py --output images_100.bin -t 100 100 test_images/*
 
-python build_image_file.py --output images_120.bin -t 120 120 test_images/*
+python build_image_file.py --output images_150.bin -t 150 150 test_images/*
+
+python build_image_file.py --output images_200.bin -t 200 200 test_images/*
 
 

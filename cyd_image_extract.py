@@ -1,3 +1,4 @@
+#
 ################################################################################
 #
 # MIT License
@@ -39,26 +40,25 @@ from modules.ili9341 import Display, color565
 USE_SDCARD = False
 
 from image_extract import ImageExtract
-#
 
 #-------------------------------------------------------------------------------
 # DISPLAY initialize
 #-------------------------------------------------------------------------------
-SPI_ID = 1
-BAUDRATE = 60_000_000
-SCK_PIN = 14
-MOSI_PIN = 13
-CS_PIN = 15
-DC_PIN = 2
-RST_PIN = 15
+DISPLAY_SPI_ID = 1
+DISPLAY_BAUDRATE = 60_000_000
+DISPLAY_SCK_PIN = 14
+DISPLAY_MOSI_PIN = 13
+DISPLAY_CS_PIN = 15
+DISPLAY_DC_PIN = 2
+DISPLAY_RST_PIN = 15
+DISPLAY_BACKLIGHT_PIN = 21
+#
 DISPLAY_WIDTH = 320
 DISPLAY_HEIGHT = 240
-ROTATION = 90
+DISPLAY_ROTATION = 90
 DISPLAY_WIDTH = 320
 DISPLAY_HEIGHT = 240
-
-
-
+#
 WHITE = color565 (255,255,255)
 BLACK = color565 (0,0,0)
 RED = color565 (255,0,0)
@@ -71,32 +71,33 @@ def initialize_display () :
     #print ("initialize_display")
     disp = None
     try :
-        spi = SPI(SPI_ID,
-                    baudrate = BAUDRATE,
-                    sck = Pin (SCK_PIN),
-                    mosi = Pin (MOSI_PIN))
+        spi = SPI(DISPLAY_SPI_ID ,
+                    baudrate = DISPLAY_BAUDRATE ,
+                    sck = Pin (DISPLAY_SCK_PIN) ,
+                    mosi = Pin (DISPLAY_MOSI_PIN))
         disp = Display (spi = spi ,
-                        cs = Pin (CS_PIN) ,
-                        dc = Pin (DC_PIN) ,
-                        rst = Pin (RST_PIN) ,
+                        cs = Pin (DISPLAY_CS_PIN) ,
+                        dc = Pin (DISPLAY_DC_PIN) ,
+                        rst = Pin (DISPLAY_RST_PIN) ,
                         width = DISPLAY_WIDTH ,
                         height = DISPLAY_HEIGHT ,
-                        rotation = ROTATION)
+                        rotation = DISPLAY_ROTATION)
         # Turn on display backlight
-        backlight = Pin(21, Pin.OUT)
+        backlight = Pin(DISPLAY_BACKLIGHT_PIN, Pin.OUT)
         backlight.on()
     except Exception as e :
         print ("init display:", e)
         pass
     gc.collect ()
     return disp
+
 # end initialize_display #
 
 #-------------------------------------------------------------------------------
 ## SD card initialize
 #-------------------------------------------------------------------------------
 
-SD_SPI_ID = 1
+SD_SPI_SLOT = 2
 SD_MISO_PIN = 19
 SD_MOSI_PIN = 23
 SD_SCK_PIN = 18
@@ -106,15 +107,15 @@ def initialize_sdcard (mount_dir = "/sd") :
     #print ("initialize_sdcard")
     if not USE_SDCARD :
         return
-    from modules.sdcard import SDCard
-    from machine import SoftSPI
+    from machine import SDCard
     try :
-        spi = SoftSPI (SD_SPI_ID ,
-                        sck = Pin (SD_SCK_PIN) ,
-                        mosi = Pin (SD_MOSI_PIN) ,
-                        miso = Pin (SD_MISO_PIN))
-        sd = SDCard (spi ,
+        sd = SDCard(slot = SD_SPI_SLOT ,
+                    sck = Pin (SD_SCK_PIN) ,
+                    miso = Pin (SD_MISO_PIN) ,
+                    mosi = Pin (SD_MOSI_PIN) ,
                     cs = Pin (SD_CS_PIN))
+        # Print SD card info (seems to be card size and sector size?)
+        #print(sd.info())
         # Mount the SD card
         os.mount(sd, mount_dir)
     except Exception as e :
@@ -132,23 +133,27 @@ def initialize_sdcard (mount_dir = "/sd") :
 display = initialize_display ()
 initialize_sdcard ()
 
-image_extract_150 = ImageExtract ("images_150.bin")
-image_extract_100 = ImageExtract ("images_100.bin")
+image_extract_150 = ImageExtract ("/images_150.bin")
+image_extract_100 = ImageExtract ("/images_100.bin")
 
-def display_image_index_100 (image_idx : int, x = 0, y = 0) :
+# SD Card:
+#image_extract_150 = ImageExtract ("/sd/images_150.bin")
+#image_extract_100 = ImageExtract ("/sd/images_100.bin")
+
+def display_image_index_100 (image_idx : int, x : int = 0, y : int = 0) :
     img = image_extract_100.get_image (image_idx)
     if img is not None :
         display.draw_sprite (img [0], x, y, img [1], img [2])
-def display_image_id_100 (image_name : str, x = 0, y = 0) :
+def display_image_id_100 (image_name : str, x : int = 0, y : int = 0) :
     img = image_extract_100.get_image_id (image_name)
     if img is not None :
         display.draw_sprite (img [0], x, y, img [1], img [2])
 
-def display_image_index_150 (image_idx : int, x = 0, y = 0) :
+def display_image_index_150 (image_idx : int, x : int = 0, y : int = 0) :
     img = image_extract_150.get_image (image_idx)
     if img is not None :
         display.draw_sprite (img [0], x, y, img [1], img [2])
-def display_image_id_150 (image_name : str, x = 0, y = 0) :
+def display_image_id_150 (image_name : str, x : int = 0, y : int = 0) :
     img = image_extract_150.get_image_id (image_name)
     if img is not None :
         display.draw_sprite (img [0], x, y, img [1], img [2])
@@ -167,11 +172,12 @@ for ids in [
     image_extract_150.rename_id (ids [0], ids [1])
 #image_extract_150.show ()
 
-
+image_extract_100.set_default_image_id ("imagenotfound")
+image_extract_150.set_default_image_id ("imagenotfound")
 
 print ("Large images")
 display.clear (WHITE)
-#display_image_id_150 ("glacier", 5, 10)
+#display_image_id_150 ("glacier", 5, 10) # only room for 2 images
 #display_image_id_150 ("mountain", 160, 10)
 display_image_id_150 ("bear", 5, 10)
 display_image_id_150 ("river", 160, 10)
@@ -179,12 +185,12 @@ time.sleep (5)
 
 print ("Small images")
 display.clear (BLUE)
-display_image_index_100 (0, 0, 10)
-display_image_index_100 (1, 105, 10)
-display_image_index_100 (2, 210, 10)
-display_image_index_100 (3, 0, 115)
-display_image_index_100 (4, 105, 115)
-display_image_index_100 (5, 210, 115)
+display_image_index_100 (1, 0, 10)
+display_image_index_100 (2, 105, 10)
+display_image_index_100 (3, 210, 10)
+display_image_index_100 (4, 0, 115)
+display_image_index_100 (5, 105, 115)
+display_image_index_100 (6, 210, 115)
 time.sleep (5)
 
 print ("Mixed images")
@@ -192,6 +198,12 @@ display.clear (BROWN)
 display_image_id_150 ("mountain", 20, 30)
 display_image_id_100 ("kennecott", 180, 30)
 display_image_id_100 ("iditarod", 180, 120)
+time.sleep (5)
+
+print ("Error images")
+display.clear (YELLOW_ORANGE)
+display_image_id_150 ("bad", 20, 30)
+display_image_index_100 (999, 180, 30)
 
 image_extract_100.shut_down ()
 image_extract_150.shut_down ()

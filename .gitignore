@@ -5,6 +5,7 @@ __pycache__/
 
 # my stuff
 *.bin
+dev/
 
 # C extensions
 *.so
