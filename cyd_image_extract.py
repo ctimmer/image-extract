@@ -173,7 +173,7 @@ for ids in [
     ] :
     image_extract_100.rename_id (ids [0], ids [1])
     image_extract_150.rename_id (ids [0], ids [1])
-image_extract_150.show ()
+#image_extract_150.show ()
 
 image_extract_100.set_default_image_id ("imagenotfound")
 image_extract_150.set_default_image_id ("imagenotfound")
