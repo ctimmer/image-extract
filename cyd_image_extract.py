@@ -133,8 +133,11 @@ def initialize_sdcard (mount_dir = "/sd") :
 display = initialize_display ()
 initialize_sdcard ()
 
+# Regular
 image_extract_150 = ImageExtract ("/images_150.bin")
-image_extract_100 = ImageExtract ("/images_100.bin")
+# Alternate
+image_extract_100 = ImageExtract ()
+image_extract_100.initialize_image_file ("/images_100.bin")
 
 # SD Card:
 #image_extract_150 = ImageExtract ("/sd/images_150.bin")
@@ -170,7 +173,7 @@ for ids in [
     ] :
     image_extract_100.rename_id (ids [0], ids [1])
     image_extract_150.rename_id (ids [0], ids [1])
-#image_extract_150.show ()
+image_extract_150.show ()
 
 image_extract_100.set_default_image_id ("imagenotfound")
 image_extract_150.set_default_image_id ("imagenotfound")

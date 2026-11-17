@@ -1,26 +1,27 @@
-'''
-MIT License
-
-Copyright (c) 2026 Curt Timmerman
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-'''
+#
+################################################################################
+# MIT License
+# 
+# Copyright (c) 2026 Curt Timmerman
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+# 
 ################################################################################
 #
 # Cheap Yellow Display - ImageExtract demo
@@ -29,11 +30,25 @@ import gc
 import json
 
 class ImageExtract :
-    buffer = None
-    buffer_view = None
+    """Provides simple access to raw images.
+
+    Attributes:
+        image_file (file): Raw image file.
+        image_config (dict): Raw image parameters.
+        count (int): Number of images in the file.
+        image_default_index (int): Index of returned image on not found.
+    """
+    buffer = None             # allocated bytearray for image readinto
+    buffer_view = None        # memory_view for partial reads
+
     def __init__ (self ,
                   image_file_name : str = None
                   ) :
+        """ Initializes attributes and image_file (optional)
+
+        Args:
+            images_file_name (optional) file containing raw images
+        """
         #print ("ImageExtract : __init__")
         
         self.image_file = None
@@ -56,24 +71,39 @@ class ImageExtract :
 
     def initialize_image_file (self ,
                                 image_file_name : str) :
+        """Reads raw image file and initializes image parameters
+        
+        Args:
+            image_file_name: raw images file
+        
+        Returns:
+            Raw image count if successful
+            None failure
+
+        """
         #print ("initialize_image_file")
-        if image_file_name is None :
-            return None
-        l_max = 0
+
         self.image_file = None
         self.image_config = None
         self.image_count = 0
+        if image_file_name is None :
+            return
+        l_max = 0
         try :
             self.image_file = open (image_file_name, "rb")
-            offset = self.image_file.read (10)
-            param_offset = int (offset)
-            self.image_file.seek (param_offset)
+            position = self.image_file.read (10)
+            if len (position) < 10 :
+                pass                  # TODO: Handle this error
+            config_seek = int (position)
+            self.image_file.seek (config_seek)
             params = self.image_file.read ().decode ()
             self.image_config = json.loads (params)
-            self.image_count = self.image_config ["count"]
         except Exception as e :
-            print ("load_image_file:", e)
-            return None
+            print ("initialize_image_file:", image_file_name)
+            print ("initialize_image_file:", e)
+            return
+
+        self.image_count = self.image_config ["count"]
         for _, image_data in enumerate (self.image_config ["images"]) :
             if image_data ["l"] > l_max :
                 l_max = image_data ["l"]
@@ -95,12 +125,12 @@ class ImageExtract :
         return self.image_config ["image_ids"][new_id] # return index
     def rename_index (self ,
                         image_idx : int ,
-                        new_name : str) :
+                        new_id : str) :
         if image_idx < 0 \
         or image_idx >= self.image_count :
             return None
-        self.image_config ["image_ids"][new_name] = image_idx
-        return self.image_config ["image_ids"][new_name] # return index
+        self.image_config ["image_ids"][new_id] = image_idx
+        return self.image_config ["image_ids"][new_id] # return index
 
     def get_image_data (self ,
                         image_idx : int) :
@@ -166,6 +196,7 @@ class ImageExtract :
     def shut_down (self) :
         if self.image_file is not None :
             self.image_file.close ()
+        self.initialize_image_file (None)
 
 # end ImageExtract
 

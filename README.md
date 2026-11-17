@@ -39,6 +39,26 @@ __build_images.bsh__ Example usage of build_image_file.py. Input images are in .
 
 __image_extract.py__ ImageExtract module. Extracts raw images from extract file for displaying on various microprocessor displays.
 
+- Methods :
+  - __init (image_file_name)__
+  - __initialize_image_file (image_file_name)__
+  - __rename_id (old_id, new_id, delete_old_id)__
+  - __rename_index (image_idx, new_id)__
+  - __get_image_data (image_idx)__
+  - __get_image (image_idx)__
+  - __get_image_id (image_id)__
+  - __set_default_image (image_idx)__
+  - __set_default_image_id (image_id)__
+  - __get_default_image ()__
+  - __show ()__
+    - Used for debugging
+    - prints
+      - image id, image index
+      - image size, image width, image_height
+  - __shut_down ()__
+    - Closes image_file, if open
+    - Initializes attributes
+
 ## Files
 
 - images_nnn.bin
