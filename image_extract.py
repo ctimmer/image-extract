@@ -185,7 +185,7 @@ class ImageExtract :
                 image_data ["h"])
 
     def __getitem__ (self, key) :
-        """Reads raw image file and initializes image parameters
+        """Returns raw image of key
         
         Args:
             key:
