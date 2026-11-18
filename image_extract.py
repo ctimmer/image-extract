@@ -184,6 +184,24 @@ class ImageExtract :
                 image_data ["w"],
                 image_data ["h"])
 
+    def __getitem__ (self, key) :
+        """Reads raw image file and initializes image parameters
+        
+        Args:
+            key:
+                if key is an integer self.get_image is called
+                if key as a string self.get_image_id is called
+        
+        Returns:
+            (image, width, height) if successful
+            None failure
+
+        """
+        if isinstance (key, str) :
+            return self.get_image_id (key)  # image id
+        elif isinstance (key, int) :
+            return self.get_image (key)     # image index
+        return None
     def show (self) :
         for _, (img_id, image_idx) in enumerate (self.image_config ["image_ids"].items ()) :
             print (img_id, image_idx)
@@ -192,11 +210,12 @@ class ImageExtract :
             width = image_data ["w"]
             height = image_data ["h"]
             print (f"  {length} {width} {height}")
-            
+
+                   # error
+
     def shut_down (self) :
         if self.image_file is not None :
             self.image_file.close ()
         self.initialize_image_file (None)
 
 # end ImageExtract
-

@@ -151,6 +151,10 @@ def display_image_id_100 (image_name : str, x : int = 0, y : int = 0) :
     img = image_extract_100.get_image_id (image_name)
     if img is not None :
         display.draw_sprite (img [0], x, y, img [1], img [2])
+def display_image_key_100 (key : int | str, x : int = 0, y : int = 0) :
+    img = image_extract_100 [key]
+    if img is not None :
+        display.draw_sprite (img [0], x, y, img [1], img [2])
 
 def display_image_index_150 (image_idx : int, x : int = 0, y : int = 0) :
     img = image_extract_150.get_image (image_idx)
@@ -158,6 +162,10 @@ def display_image_index_150 (image_idx : int, x : int = 0, y : int = 0) :
         display.draw_sprite (img [0], x, y, img [1], img [2])
 def display_image_id_150 (image_name : str, x : int = 0, y : int = 0) :
     img = image_extract_150.get_image_id (image_name)
+    if img is not None :
+        display.draw_sprite (img [0], x, y, img [1], img [2])
+def display_image_key_150 (key : int | str, x : int = 0, y : int = 0) :
+    img = image_extract_150 [key]
     if img is not None :
         display.draw_sprite (img [0], x, y, img [1], img [2])
 

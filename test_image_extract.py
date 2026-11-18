@@ -135,6 +135,13 @@ def display_image_id_100 (id : str, x : int = 0, y : int = 0) :
         display.draw_sprite (img [0], x, y, img [1], img [2])
     else :
         print (f"  id={id} NOT FOUND")
+def display_image_key_100 (key : int | str, x : int = 0, y : int = 0) :
+    print (f"display_key_100: key={key} pos=({x},{y})")
+    img = image_extract_100 [key]
+    if img is not None :
+        display.draw_sprite (img [0], x, y, img [1], img [2])
+    else :
+        print (f"  id={id} NOT FOUND")
 
 def display_image_index_150 (image_idx : int, x : int = 0, y : int = 0) :
     print (f"display_index_150: idx={image_idx} pos=({x},{y})")
@@ -146,6 +153,13 @@ def display_image_index_150 (image_idx : int, x : int = 0, y : int = 0) :
 def display_image_id_150 (id : str, x : int = 0, y : int = 0) :
     print (f"display_id_150: id={id} pos=({x},{y})")
     img = image_extract_150.get_image_id (id)
+    if img is not None :
+        display.draw_sprite (img [0], x, y, img [1], img [2])
+    else :
+        print (f"  id={id} NOT FOUND")
+def display_image_key_150 (key : int | str, x : int = 0, y : int = 0) :
+    print (f"display_key_150: key={key} pos=({x},{y})")
+    img = image_extract_150 [key]
     if img is not None :
         display.draw_sprite (img [0], x, y, img [1], img [2])
     else :
@@ -190,6 +204,8 @@ display.clear (BROWN)
 display_image_id_150 ("mountain", 20, 30)
 display_image_id_100 ("kennecott", 180, 30)
 display_image_id_100 ("iditarod", 180, 120)
+
+display_image_key_150 ("mountain", 20, 30)
 
 print ("Error images")
 display.clear (YELLOW_ORANGE)

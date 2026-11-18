@@ -45,6 +45,7 @@ __image_extract.py__ ImageExtract module. Extracts raw images from extract file 
   - __initialize_image_file (image_file_name)__
     - image_file_name (optional) File that contains raw images
       - If omitted, class attributes are reset
+      - image_file is created by __build_image_file.py__
   - __rename_id (old_id, new_id, delete_old_id)__
     - old_id current existing image_id
     - new_id image_id added to reference old_id raw image.
@@ -63,10 +64,18 @@ __image_extract.py__ ImageExtract module. Extracts raw images from extract file 
     - image_id id of raw image to be returned.
     - returns (image, width, height) (success) or None (failed).
   - __set_default_image (image_idx)__
+    - Sets the default image index to image_idx
+    - If the requested image is not found, this image will be returned instead.
   - __set_default_image_id (image_id)__
+    - Sets the default image index to the image_idx of image_id
   - __get_default_image ()__
     - Normally used internally.
     - returns (image, width, height) (success) or None (no default image).
+  - __\_\_getitem\_\_ (key)__
+    - Shortened image access:
+      - instance [5] # returns get_image [5]
+      - instance ["test"] # returns get_image_id ["test"]
+      - returns (image, width, height) (success) or None (failed).
   - __show ()__
     - Used for debugging
     - prints
